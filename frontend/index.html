@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" x-data="userApp()" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <title>ERP Users</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/alpinejs" defer></script>
+  <script src="https://unpkg.com/pristinejs/dist/pristine.min.js"></script>
+</head>
+<body class="flex h-screen bg-gray-100">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-gray-900 text-white flex flex-col p-4">
+    <h1 class="text-xl font-bold mb-6">ERP</h1>
+    <nav class="space-y-3">
+      <a href="#" class="block hover:bg-gray-700 px-3 py-2 rounded">Dashboard</a>
+      <a href="#" class="block hover:bg-gray-700 px-3 py-2 rounded">Users</a>
+      <a href="#" class="block hover:bg-gray-700 px-3 py-2 rounded">Routes</a>
+      <a href="#" class="block hover:bg-gray-700 px-3 py-2 rounded">Entity</a>
+      <a href="#" class="block hover:bg-gray-700 px-3 py-2 rounded">Employees</a>
+      <a href="#" class="block hover:bg-gray-700 px-3 py-2 rounded">Attendance</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-6" x-data>
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold">Users</h2>
+      <button @click="openModal = true"
+        class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700">+ Add User</button>
+    </div>
+
+    <!-- Users Table -->
+    <div class="overflow-x-auto bg-white rounded shadow">
+      <table class="min-w-full text-sm text-left text-gray-600">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-4 py-2">First Name</th>
+            <th class="px-4 py-2">Last Name</th>
+            <th class="px-4 py-2">Role</th>
+            <th class="px-4 py-2">Email Address</th>
+            <th class="px-4 py-2">Mobile</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="user in users" :key="user.email">
+            <tr class="border-t">
+              <td class="px-4 py-2" x-text="user.firstName"></td>
+              <td class="px-4 py-2" x-text="user.lastName"></td>
+              <td class="px-4 py-2" x-text="user.role"></td>
+              <td class="px-4 py-2" x-text="user.email"></td>
+              <td class="px-4 py-2" x-text="user.mobile"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Add User Modal -->
+  <div x-show="openModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md" @click.away="openModal=false">
+      <h3 class="text-xl font-bold mb-4">Add User</h3>
+      <form id="userForm" class="space-y-3">
+        <div>
+          <label class="block">Full Name</label>
+          <input type="text" name="name" class="w-full border rounded px-3 py-2" required>
+        </div>
+        <div>
+          <label class="block">Role</label>
+          <input type="text" name="role" class="w-full border rounded px-3 py-2" required>
+        </div>
+        <div>
+          <label class="block">Email</label>
+          <input type="email" name="email" class="w-full border rounded px-3 py-2" required>
+        </div>
+        <div>
+          <label class="block">Mobile</label>
+          <input type="tel" name="mobile" class="w-full border rounded px-3 py-2" required>
+        </div>
+        <div>
+          <label class="block">Password</label>
+          <input type="password" name="password" class="w-full border rounded px-3 py-2" required>
+        </div>
+        <div>
+          <label class="block">Confirm Password</label>
+          <input type="password" name="confirmPassword" class="w-full border rounded px-3 py-2" required>
+        </div>
+        <div class="flex items-center">
+          <input type="checkbox" name="terms" class="mr-2" required> <span>Accept Terms & Conditions</span>
+        </div>
+        <div class="flex justify-end space-x-3 pt-4">
+          <button type="button" @click="openModal=false"
+            class="px-4 py-2 border rounded">Cancel</button>
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Alpine + JS Logic -->
+  <script>
+    function userApp() {
+      return {
+        openModal: false,
+        users: [],
+        init() {
+          // Fetch mock API
+          fetch('https://jsonplaceholder.typicode.com/users')
+            .then(res => res.json())
+            .then(data => {
+              this.users = data.slice(0, 10).map(u => ({
+                firstName: u.name.split(' ')[0],
+                lastName: u.name.split(' ')[1] || '',
+                role: 'User',
+                email: u.email,
+                mobile: u.phone
+              }));
+            });
+
+          // Form validation
+          const form = document.getElementById("userForm");
+          const pristine = new Pristine(form);
+
+          form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (pristine.validate()) {
+              alert("User added successfully!");
+              this.openModal = false;
+            }
+          });
+        }
+      }
+    }
+  </script>
+</body>
+</html>
